@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>회원가입</title>
+  </head>
+  <body>
+    <h2>회원가입</h2>
+    <form method="POST" action="/signup">
+      <input type="text" name="user_id" placeholder="아이디" required /><br />
+      <input
+        type="password"
+        name="password"
+        placeholder="비밀번호"
+        required
+      /><br />
+      <button type="submit">회원가입</button>
+    </form>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <script>
+          alert("{{ messages[0] }}");
+        </script>
+      {% endif %} 
+    {% endwith %}
+  </body>
+</html>
