@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시물 작성</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/create_post.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header>
+            <button class="back-button" onclick="location.href='{{ url_for('main') }}'">←</button>
+            <button class="close-button" onclick="location.href='{{ url_for('main') }}'">✕</button>
+        </header>
+
+        <!-- 게시물 작성 폼 -->
+        <form action="{{ url_for('create_post') }}" method="POST" enctype="multipart/form-data">
+            <div class="content-wrapper">
+                <div class="search-section">
+                    <!-- 제목 입력 -->
+                    <div class="title-box">
+                        <input type="text" id="title" placeholder="제목을 입력해주세요." name="title">
+                    </div>
+                    <!-- 음악 검색 -->
+                    <div class="search-box">
+                        <img src="{{ url_for('static', filename='img/search.png') }}" class="search-icon">
+                        <input type="text" id="musicSearch" placeholder="노래 검색" name="music_query">
+                    </div>
+
+                    <div class="search-results" id="searchResults">
+                        <div class="result-item">
+                            <img src="{{ url_for('static', filename='img/album1.jpg') }}" alt="앨범1" class="album-cover">
+                            <div class="result-info">
+                                <div class="song-title">Toki Yo Tomare</div>
+                                <div class="artist-name">ELIJI • Toki Yo Tomare</div>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <img src="{{ url_for('static', filename='img/album2.jpg') }}" alt="앨범2" class="album-cover">
+                            <div class="result-info">
+                                <div class="song-title">Tokiyo</div>
+                                <div class="artist-name">Dep-Rashare • YELLOW DANCER</div>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <img src="{{ url_for('static', filename='img/album3.jpg') }}" alt="앨범3" class="album-cover">
+                            <div class="result-info">
+                                <div class="song-title">Tokyo Drift (Fast & Furious) - From "The Fast And The Furious: Tokyo Dr...</div>
+                                <div class="artist-name">Teriyaki Boys • Tokyo Drift (Fast & Furious)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 이미지 업로드 섹션 -->
+                <div class="image-section">
+                    <div class="image-upload-area" id="imageUploadArea">
+                        <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
+                        <label for="imageInput" class="upload-label">
+                            <div class="upload-placeholder">
+                                <strong>+</strong>
+                                <p>사진을 업로드하세요</p>
+                            </div>
+                        </label>
+                        <img id="previewImage" class="preview-image" style="display: none;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 색상 팔레트 -->
+            <div class="color-palette" id="colorPalette"></div>
+
+            <div class="button-box">
+                <button type="submit" class="submit-button">게시하기</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const preview = document.getElementById('previewImage');
+        const placeholder = document.querySelector('.upload-placeholder');
+        const paletteContainer = document.getElementById('colorPalette');
+
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                preview.src = event.target.result;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+
+                // Color Thief를 이용한 색상 추출
+                const colorThief = new ColorThief();
+
+                // 이미지가 로드된 후 추출해야 함
+                preview.onload = function() {
+                    const palette = colorThief.getPalette(preview, 4); // 대표색 4개
+                    paletteContainer.innerHTML = ''; // 기존 색상 초기화
+                    palette.forEach(color => {
+                        const hex = rgbToHex(color[0], color[1], color[2]);
+                        const div = document.createElement('div');
+                        div.className = 'color-box';
+                        div.style.backgroundColor = hex;
+                        paletteContainer.appendChild(div);
+                    });
+                }
+            }
+            reader.readAsDataURL(file);
+        });
+
+        // RGB → HEX 변환 함수
+        function rgbToHex(r, g, b) {
+            return "#" + [r, g, b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? "0" + hex : hex;
+            }).join('');
+        }
+    </script>
+
+    <script>
+        // 이미지 미리보기
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('previewImage');
+                    const placeholder = document.querySelector('.upload-placeholder');
+
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 검색 결과 선택
+        document.querySelectorAll('.result-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.result-item').forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>

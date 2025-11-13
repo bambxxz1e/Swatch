@@ -4,16 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Swatch</title>
+      <link rel="stylesheet" href=" {{ url_for('static', filename='css/main.css') }}">
   </head>
   <body>
-    안녕을 안녕함 
-	
-	{% with messages = get_flashed_messages() %} 
-		{% if messages %}
-			<script>
-				alert("{{ messages[0] }}");
-			</script>
-    	{% endif %}
-	{% endwith %}
+    <header>
+        <img src="{{ url_for('static', filename='img/swatch_logo.png') }}" alt="로고 이미지">
+    </header>
+
+    <main>
+        <button class="plus-button" onclick="location.href='{{ url_for('create_post') }}'">
+            <img src="{{ url_for('static', filename='img/plus.png') }}">
+        </button>
+    </main>
+
+    {% with messages = get_flashed_messages() %}
+       {% if messages %}
+          <script>
+             alert("{{ messages[0] }}");
+          </script>
+        {% endif %}
+    {% endwith %}
   </body>
 </html>
