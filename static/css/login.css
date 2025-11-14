@@ -1,0 +1,71 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f2f2f2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* 폼 컨테이너 */
+form {
+    background-color: white;
+    padding: 20px 40px 40px 40px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 300px;
+    box-sizing: border-box;
+}
+
+/* 폼 제목 */
+h2 {
+    margin-bottom: 40px;
+    color: #5f5f60;
+}
+
+/* 입력창 스타일 */
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border-color: #5f5f60;
+    box-shadow: 0 0 5px rgba(95, 95, 96, 0.3);
+}
+
+/* 제출 버튼 */
+.button-box {
+    margin-top: 15px;
+    display: flex;
+    gap: 6px;
+}
+
+button[type="submit"] {
+    width: 120px;
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: #5f5f60;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button[type="submit"]:hover {
+    background-color: #363535;
+}

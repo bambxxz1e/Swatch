@@ -1,28 +1,28 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <title>로그인</title>
-  </head>
-  <body>
-    <h2>로그인</h2>
-    <form method="POST" action="/login">
-      <input type="text" name="user_id" placeholder="아이디" required /><br />
-      <input
-        type="password"
-        name="password"
-        placeholder="비밀번호"
-        required
-      /><br />
-      <button type="submit">로그인</button>
+    <title>로그인 / 회원가입</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body>
+    <form method="POST" action="/">
+        <h2>로그인 / 회원가입</h2>
+        <input type="text" name="user_id" placeholder="아이디" required /><br />
+        <input type="password" name="password" placeholder="비밀번호" required /><br />
+
+        <div class="button-box">
+          <button type="submit" name="action" value="login">로그인</button>
+          <button type="submit" name="action" value="signup">회원가입</button>
+        </div>
     </form>
 
-    {% with messages = get_flashed_messages() %} 
+    {% with messages = get_flashed_messages() %}
       {% if messages %}
         <script>
           alert("{{ messages[0] }}");
         </script>
-        {% endif %}
+      {% endif %}
     {% endwith %}
-  </body>
+</body>
 </html>

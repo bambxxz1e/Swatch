@@ -1,6 +1,7 @@
 import pymysql
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv()
 DB_KEY = os.environ.get('DB_KEY')
@@ -54,3 +55,20 @@ class DBManager:
         user = cur.fetchone()
         conn.close()
         return bool(user)
+
+    # 게시물 저장
+    def save_post(self, user_id, title=None, song_title=None, artist=None, ootd_image_url=None, color_palette=[]):
+        if not self.conn:
+            self.connect()
+        try:
+            with self.conn.cursor() as cursor:
+                sql = """
+                    INSERT INTO records (user_id, title, song_title, artist, ootd_image_url, color_palette, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, NOW())
+                """
+                # JSON으로 변환
+                color_json = json.dumps(color_palette)
+                cursor.execute(sql, (user_id, title, song_title, artist, ootd_image_url, color_json))
+            self.conn.commit()
+        except Exception as e:
+            print("레코드 저장 실패:", e)
