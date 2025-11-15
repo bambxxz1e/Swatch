@@ -43,14 +43,19 @@ def index():
 
 @app.route('/main')
 def main():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash("로그인이 필요합니다.")
+        return redirect(url_for('index'))
+
     try:
-        posts = db.get_all_posts()
+        posts = db.get_all_posts(user_id=user_id)
         print(f"[DEBUG] 가져온 게시물 수: {len(posts)}")
     except Exception as e:
         print("[ERROR] main() DB 조회 실패:", e)
         posts = []
 
-    return render_template('main.html', posts=posts, user_id=session.get('user_id'))
+    return render_template('main.html', posts=posts, user_id=user_id)
 
 # 게시물 작성
 @app.route('/create', methods=['GET', 'POST'])
@@ -111,6 +116,18 @@ def create_post():
             flash(f"게시물 저장 중 오류 발생: {e}")
 
     return render_template('create_post.html', uploaded_image=uploaded_image)
+
+@app.route('/delete_post/<int:post_id>', methods=['POST'])
+def delete_post(post_id):
+    if 'user_id' not in session:
+        return {"success": False, "msg": "로그인이 필요합니다."}
+
+    try:
+        db.delete_post(post_id, session['user_id'])
+        return {"success": True}
+    except Exception as e:
+        print("삭제 실패:", e)
+        return {"success": False}
 
 # Spotify API
 def get_spotify_token():

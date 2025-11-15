@@ -75,42 +75,60 @@ class DBManager:
             print("레코드 저장 실패:", e)
 
     # 모든 게시물 가져오기
-    def get_all_posts(self, limit=None):
+    def get_all_posts(self, user_id=None, limit=None):
+        conn = self.connect()
+        if not conn:
+            return []
+
         try:
-            conn = self.connect()
-            if not conn:
-                return []
-
             with conn.cursor() as cursor:
-                if limit:
-                    sql = """
-                        SELECT user_id, title, song_title, artist, ootd_image_url, color_palette, created_at
-                        FROM records
-                        ORDER BY created_at DESC
-                        LIMIT %s
-                    """
-                    cursor.execute(sql, (limit,))
-                else:
-                    sql = """
-                        SELECT user_id, title, song_title, artist, ootd_image_url, color_palette, created_at
-                        FROM records
-                        ORDER BY created_at DESC
-                    """
-                    cursor.execute(sql)
+                sql = """
+                    SELECT record_id, user_id, title, song_title, artist, ootd_image_url, color_palette, created_at
+                    FROM records
+                """
+                params = []
 
+                if user_id:  # 로그인한 계정만 가져오기
+                    sql += " WHERE user_id=%s"
+                    params.append(user_id)
+
+                sql += " ORDER BY created_at DESC"
+
+                if limit:
+                    sql += " LIMIT %s"
+                    params.append(limit)
+
+                cursor.execute(sql, tuple(params))
                 posts = cursor.fetchall()
 
-                # JSON 문자열을 파이썬 객체로 변환
+                # color_palette JSON 파싱
                 for post in posts:
                     if post['color_palette']:
                         post['color_palette'] = json.loads(post['color_palette'])
 
-            return posts
+                return posts
 
         except Exception as e:
             print("게시물 조회 실패:", e)
             return []
-
         finally:
             if conn:
-                conn.close()  # 사용 후 항상 닫기
+                conn.close()
+
+    # 선택 게시물 삭제하기
+    def delete_post(self, post_id, user_id):
+        conn = self.connect()
+        if not conn:
+            print("DB 연결 실패")
+            return
+
+        try:
+            with conn.cursor() as cursor:
+                sql = "DELETE FROM records WHERE record_id=%s AND user_id=%s"
+                cursor.execute(sql, (post_id, user_id))
+            conn.commit()
+            print(f"DB 삭제 완료: {post_id}")
+        except Exception as e:
+            print("게시물 삭제 실패:", e)
+        finally:
+            conn.close()

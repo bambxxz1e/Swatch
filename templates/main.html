@@ -21,7 +21,7 @@
     <main>
         <div class="posts-grid">
             {% for post in posts %}
-            <div class="post-card">
+            <div class="post-card" data-id="{{ post.record_id }}">
 
                 <div class="post-top">
                     <div class="post-img-area">
@@ -52,6 +52,17 @@
             </div>
             {% endfor %}
         </div>
+
+        <!-- 삭제 확인 모달 -->
+        <div id="deleteModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <p>삭제하시겠습니까?</p>
+                <div class="button-box">
+                    <button id="confirmDelete">삭제</button>
+                    <button id="cancelDelete">취소</button>
+                </div>
+            </div>
+        </div>
     </main>
 
     {% with messages = get_flashed_messages() %}
@@ -61,5 +72,48 @@
           </script>
         {% endif %}
     {% endwith %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const postsGrid = document.querySelector('.posts-grid');
+            const modal = document.getElementById('deleteModal');
+            const confirmBtn = document.getElementById('confirmDelete');
+            const cancelBtn = document.getElementById('cancelDelete');
+
+            let targetPostId = null;
+            let targetCard = null;
+
+            // posts-grid에서 클릭 발생하면 체크
+            postsGrid.addEventListener('click', (e) => {
+                const card = e.target.closest('.post-card'); // 클릭한 요소가 post-card 내부면 찾기
+                if (!card) return; // 카드 외부 클릭 시 무시
+
+                targetPostId = card.dataset.id;
+                targetCard = card;
+                modal.style.display = 'block';
+            });
+
+            // 취소 버튼
+            cancelBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+                targetPostId = null;
+                targetCard = null;
+            });
+
+            // 삭제 확인
+            confirmBtn.addEventListener('click', () => {
+                fetch(`/delete_post/${targetPostId}`, { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.success){
+                            targetCard.remove(); // 화면에서도 제거
+                        }
+                        modal.style.display = 'none';
+                    })
+                    .catch(err => console.error(err));
+            });
+        });
+    </script>
+
   </body>
 </html>

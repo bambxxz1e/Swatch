@@ -99,3 +99,54 @@ header {
     font-size: 18px;
     color: #444;
 }
+
+/* 모달 전체(배경) */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: none; /* hidden 상태 기본 */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* 모달 창(콘텐츠) */
+.modal-content {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  padding: 25px 30px;
+  border-radius: 12px;
+  text-align: center;
+  width: 280px;
+}
+
+.button-box {
+    margin-top: 15px;
+    gap: 6px;
+}
+
+.button-box button {
+    width: 80px;
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: #5f5f60;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.button-box button:hover {
+    background-color: #363535;
+}
+
