@@ -17,7 +17,8 @@ class DBManager:
                 user='root',
                 password=DB_KEY,
                 db='swatch',
-                charset='utf8mb4'
+                charset='utf8mb4',
+                cursorclass = pymysql.cursors.DictCursor
             )
             return self.conn
         except pymysql.MySQLError as e:
@@ -72,3 +73,44 @@ class DBManager:
             self.conn.commit()
         except Exception as e:
             print("레코드 저장 실패:", e)
+
+    # 모든 게시물 가져오기
+    def get_all_posts(self, limit=None):
+        try:
+            conn = self.connect()
+            if not conn:
+                return []
+
+            with conn.cursor() as cursor:
+                if limit:
+                    sql = """
+                        SELECT user_id, title, song_title, artist, ootd_image_url, color_palette, created_at
+                        FROM records
+                        ORDER BY created_at DESC
+                        LIMIT %s
+                    """
+                    cursor.execute(sql, (limit,))
+                else:
+                    sql = """
+                        SELECT user_id, title, song_title, artist, ootd_image_url, color_palette, created_at
+                        FROM records
+                        ORDER BY created_at DESC
+                    """
+                    cursor.execute(sql)
+
+                posts = cursor.fetchall()
+
+                # JSON 문자열을 파이썬 객체로 변환
+                for post in posts:
+                    if post['color_palette']:
+                        post['color_palette'] = json.loads(post['color_palette'])
+
+            return posts
+
+        except Exception as e:
+            print("게시물 조회 실패:", e)
+            return []
+
+        finally:
+            if conn:
+                conn.close()  # 사용 후 항상 닫기

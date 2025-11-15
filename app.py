@@ -43,53 +43,72 @@ def index():
 
 @app.route('/main')
 def main():
-    if 'user_id' not in session:
-        flash("로그인이 필요합니다.")
-        return redirect(url_for('/'))
-    return render_template('main.html', user_id=session['user_id'])
+    try:
+        posts = db.get_all_posts()
+        print(f"[DEBUG] 가져온 게시물 수: {len(posts)}")
+    except Exception as e:
+        print("[ERROR] main() DB 조회 실패:", e)
+        posts = []
+
+    return render_template('main.html', posts=posts, user_id=session.get('user_id'))
 
 # 게시물 작성
 @app.route('/create', methods=['GET', 'POST'])
 def create_post():
     uploaded_image = None
+
     if 'user_id' not in session:
         flash("로그인이 필요합니다.")
-        return redirect(url_for('/'))
+        return redirect(url_for('index'))
 
     if request.method == 'POST':
-        user_id = session['user_id']
-        title = request.form.get('title', '').strip()
-        song_title = request.form.get('music_title', '').strip()
-        artist = request.form.get('music_artist', '').strip()
+        try:
+            user_id = session['user_id']
+            title = request.form.get('title', '').strip()
+            song_title = request.form.get('music_title', '').strip()
+            artist = request.form.get('music_artist', '').strip()
 
-        # 이미지 업로드
-        file = request.files.get('image')
-        if file and file.filename:
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-            uploaded_image = filepath.replace("\\", "/")
+            print(f"[DEBUG] user_id: {user_id}, title: {title}, song: {song_title}, artist: {artist}")
 
-        # JS에서 보낸 색상 4개 변수 받기
-        colors = [
-            request.form.get('color1', ''),
-            request.form.get('color2', ''),
-            request.form.get('color3', ''),
-            request.form.get('color4', '')
-        ]
+            # 이미지 업로드
+            file = request.files.get('image')
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(filepath)
+                uploaded_image = filepath.replace("\\", "/")
+                print(f"[DEBUG] 이미지 업로드 성공: {uploaded_image}")
+            else:
+                print("[DEBUG] 업로드할 이미지 없음")
 
-        # DB 저장
-        db.save_post(
-            user_id=user_id,
-            title=title,
-            song_title=song_title,
-            artist=artist,
-            ootd_image_url=uploaded_image,
-            color_palette=colors
-        )
+            # JS에서 보낸 색상 4개 변수 받기
+            colors = [
+                request.form.get('color1', ''),
+                request.form.get('color2', ''),
+                request.form.get('color3', ''),
+                request.form.get('color4', '')
+            ]
+            print(f"[DEBUG] 색상 팔레트: {colors}")
 
-        flash('게시물이 성공적으로 등록되었습니다!')
-        return redirect(url_for('main'))
+            # DB 저장
+            db.connect()
+            db.save_post(
+                user_id=user_id,
+                title=title,
+                song_title=song_title,
+                artist=artist,
+                ootd_image_url=uploaded_image,
+                color_palette=colors
+            )
+            db.close()
+            print("[DEBUG] 게시물 저장 성공!")
+
+            flash('게시물이 성공적으로 등록되었습니다!')
+            return redirect(url_for('main'))
+
+        except Exception as e:
+            print("[ERROR] 게시물 저장 실패:", e)
+            flash(f"게시물 저장 중 오류 발생: {e}")
 
     return render_template('create_post.html', uploaded_image=uploaded_image)
 

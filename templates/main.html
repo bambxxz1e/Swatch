@@ -4,17 +4,54 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Swatch</title>
-      <link rel="stylesheet" href=" {{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   </head>
   <body>
     <header>
-        <img src="{{ url_for('static', filename='img/swatch_logo.png') }}" alt="로고 이미지">
+        <div class="header-box">
+            <img src="{{ url_for('static', filename='img/swatch_logo.png') }}" alt="로고 이미지">
+
+            <!-- 플러스 버튼 -->
+            <button class="plus-button" onclick="location.href='{{ url_for('create_post') }}'">
+                <img src="{{ url_for('static', filename='img/plus.png') }}">
+            </button>
+        </div>
     </header>
 
     <main>
-        <button class="plus-button" onclick="location.href='{{ url_for('create_post') }}'">
-            <img src="{{ url_for('static', filename='img/plus.png') }}">
-        </button>
+        <div class="posts-grid">
+            {% for post in posts %}
+            <div class="post-card">
+
+                <div class="post-top">
+                    <div class="post-img-area">
+                        <img src="{{ post.ootd_image_url }}">
+                    </div>
+
+                    {% if post.color_palette %}
+                    <div class="color-palette-vertical">
+                        {% for color in post.color_palette[:5] %}
+                        <div class="color-swatch-vertical" style="background-color: {{ color }};"></div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="post-info">
+                    {% if post.title %}
+                    <h3 class="post-title">{{ post.title }}</h3>
+                    {% endif %}
+
+                    <div class="post-date">{{ post.created_at.strftime('%Y.%m.%d') }}</div>
+
+                    {% if post.song_title and post.artist %}
+                    <div class="post-song">{{ post.artist }} - {{ post.song_title }}</div>
+                    {% endif %}
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
     </main>
 
     {% with messages = get_flashed_messages() %}
