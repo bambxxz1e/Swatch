@@ -6,19 +6,32 @@
 }
 
 body {
-    padding: 20px;
+
+body {
+    padding-top: 140px;
+    padding-left: 20px;
+    padding-right: 20px;
     font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Helvetica", sans-serif;
     color: #222;
 }
 
 header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
     padding: 20px;
-    margin: 0px 80px 20px 80px;
+    z-index: 1000;
+    background-color: white;
 }
 
 .header-box {
     display: flex;
     justify-content: space-between;
+    padding-top: 10px;
+    padding-bottom: 5px;
+    margin-left: 40px;
+    margin-right: 70px;
 }
 
 /* 플러스 버튼 */
@@ -39,7 +52,7 @@ header {
     gap: 40px;
     padding: 20px 0;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 140px auto 0;
     justify-content: flex-start;
 }
 
