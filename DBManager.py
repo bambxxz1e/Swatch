@@ -10,6 +10,7 @@ class DBManager:
     def __init__(self):
         self.conn = None
 
+    # DB 연결
     def connect(self):
         try:
             self.conn = pymysql.connect(
@@ -18,13 +19,14 @@ class DBManager:
                 password=DB_KEY,
                 db='swatch',
                 charset='utf8mb4',
-                cursorclass = pymysql.cursors.DictCursor
+                cursorclass = pymysql.cursors.DictCursor # 결과를 딕셔너리 형태로 변환(원래는 튜플)
             )
             return self.conn
         except pymysql.MySQLError as e:
             print("MySQL 연결 실패:", e)
             return None
 
+    # DB 연결 종료
     def close(self):
         if self.conn:
             self.conn.close()
@@ -35,12 +37,14 @@ class DBManager:
         if not conn:
             return False, "DB 연결 실패"
         cur = conn.cursor()
+        
         # 중복 체크
         cur.execute("SELECT * FROM users WHERE user_id=%s", (user_id,))
         if cur.fetchone():
             conn.close()
             return False, "이미 존재하는 아이디입니다."
-        # 저장
+        
+        # 새 사용자 저장
         cur.execute("INSERT INTO users (user_id, password) VALUES (%s, %s)", (user_id, password))
         conn.commit()
         conn.close()
@@ -51,9 +55,13 @@ class DBManager:
         conn = self.connect()
         if not conn:
             return False
+        
         cur = conn.cursor()
+        
+        # 아이디 비번 일치 확인
         cur.execute("SELECT * FROM users WHERE user_id=%s AND password=%s", (user_id, password))
         user = cur.fetchone()
+        
         conn.close()
         return bool(user)
 
@@ -67,9 +75,12 @@ class DBManager:
                     INSERT INTO records (user_id, title, song_title, artist, ootd_image_url, color_palette, created_at)
                     VALUES (%s, %s, %s, %s, %s, %s, NOW())
                 """
-                # JSON으로 변환
+                
+                # 컬러 팔레트 리스트를 JSON 문자열로 변환
                 color_json = json.dumps(color_palette)
+
                 cursor.execute(sql, (user_id, title, song_title, artist, ootd_image_url, color_json))
+
             self.conn.commit()
         except Exception as e:
             print("레코드 저장 실패:", e)
@@ -92,8 +103,10 @@ class DBManager:
                     sql += " WHERE user_id=%s"
                     params.append(user_id)
 
+                # 최신순 정렬
                 sql += " ORDER BY created_at DESC"
 
+                # 가져올 게시물 개수 제한
                 if limit:
                     sql += " LIMIT %s"
                     params.append(limit)
@@ -101,7 +114,7 @@ class DBManager:
                 cursor.execute(sql, tuple(params))
                 posts = cursor.fetchall()
 
-                # color_palette JSON 파싱
+                # color_palette JSON을 다시 리스트로 반환
                 for post in posts:
                     if post['color_palette']:
                         post['color_palette'] = json.loads(post['color_palette'])
@@ -124,10 +137,13 @@ class DBManager:
 
         try:
             with conn.cursor() as cursor:
+                # record_id와 user_id 둘 다 일치할 때만 삭제
                 sql = "DELETE FROM records WHERE record_id=%s AND user_id=%s"
                 cursor.execute(sql, (post_id, user_id))
+
             conn.commit()
             print(f"DB 삭제 완료: {post_id}")
+
         except Exception as e:
             print("게시물 삭제 실패:", e)
         finally:

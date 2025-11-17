@@ -69,12 +69,12 @@
         const searchInput = document.getElementById("musicSearch");
         const resultsBox = document.getElementById("searchResults");
 
-        let paletteColors = []; // JS 변수에 색상 저장
-        let selectedMusic = { title: "", artist: "" }; // 음악 선택 변수
+        let paletteColors = []; // 추출한 색상 값을 저장하는 배열
+        let selectedMusic = { title: "", artist: "" }; // 선택된 음악 정보 저장
 
         const form = document.querySelector('form');
 
-        // RGB → HEX 변환
+        // RGB을 HEX로 변환
         function rgbToHex(r, g, b) {
             return "#" + [r, g, b].map(x => {
                 const hex = x.toString(16);
@@ -82,13 +82,15 @@
             }).join('');
         }
 
-        // 이미지 업로드 & 미리보기 + 색상 추출
+        // 이미지 업로드 + 미리보기 + 색상 추출
         imageInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
+
             reader.onload = function(event) {
+                // 이미지 미리보기 표시
                 preview.src = event.target.result;
                 preview.style.display = 'block';
                 placeholder.style.display = 'none';
@@ -96,10 +98,14 @@
                 const colorThief = new ColorThief();
 
                 preview.onload = function() {
+                    // 이미지에서 대표 색상 4개 추출
                     const palette = colorThief.getPalette(preview, 4);
-                    paletteColors = palette.map(c => rgbToHex(c[0], c[1], c[2])); // 변수에 저장
-                    paletteContainer.innerHTML = ''; // 화면용 초기화
 
+                    // 변환하여 배열로 저장
+                    paletteColors = palette.map(c => rgbToHex(c[0], c[1], c[2]));
+                    paletteContainer.innerHTML = ''; // 기존 색상 박스 초기화
+
+                    # 색상 박스 생성해 화면에 표시
                     paletteColors.forEach(color => {
                         const div = document.createElement('div');
                         div.className = 'color-box';
@@ -108,26 +114,29 @@
                     });
                 }
             }
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(file); // 업로드한 이미지 파일 읽기
         });
 
-        // 음악 검색 & 선택
+        // 음악 검색 + 선택
         let debounceTimer = null;
 
         searchInput.addEventListener("input", function() {
             const q = this.value.trim();
-            clearTimeout(debounceTimer);
+            clearTimeout(debounceTimer); // 이전 타이머 제거
 
+            // 0.35초 동안 입력이 멈추면 검색 실행
             debounceTimer = setTimeout(() => {
                 if (q.length < 1) {
                     resultsBox.innerHTML = "";
                     return;
                 }
 
+                // Flask의 /search_music API 호출
                 fetch(`/search_music?q=${q}`)
                     .then(res => res.json())
                     .then(data => {
                         let html = "";
+
                         data.results.forEach(item => {
                             html += `
                             <div class="result-item">
